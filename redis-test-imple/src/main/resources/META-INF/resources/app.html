@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>KVS test implementation</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
+        <style>
+            .turn-on {
+                display: block;
+            }
+            .turn-off {
+                display: none;
+            }
+        </style>
+        <!-- Load AngularJS -->
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+        <script type="text/javascript">
+            let app = angular.module("LoginManagement", []);
+            const X_AUTH_TOKEN = "X-Authorization-Token";
+            app.controller("LoginManagementController", function($scope, $http) {
+                $scope.form = { email: "", password: ""};
+                $scope.phaseId = "login";
+                $scope.user = {};
+                $scope.pages = {
+                    welcome: {
+                        url: "/welcome",
+                        makeData: function() { return {data: "welcome"}; },
+                        success: function(response) {
+                            $scope.user = response.data.user;
+                            _flip("welcome");
+                        },
+                    },
+                    logout: {
+                        url: "/login/logout",
+                        makeData: function() { return {}; },
+                        success: function(response) {
+                            $scope.user = {};
+                            _flip("login");
+                        }
+                    }
+                };
+
+                $scope.doLogin = function() {
+                    console.log("doLogin");
+                    let data = { email: $scope.form.email, password: $scope.form.password};
+                    $http({
+                        method: "POST",
+                        url: "/login",
+                        data: angular.toJson(data),
+                        headers: {
+                            "Content-Type": 'application/json'
+                        }
+                    }).then(_success, _failure);
+                };
+
+                $scope.doAnyPost = function(pageName) {
+                    const page = $scope.pages[pageName];
+                    if (page === null) {
+                        return;
+                    }
+                    const data = page.makeData();
+                    $http({
+                        method: "POST",
+                        url: page.url,
+                        data: angular.toJson(data),
+                        headers: {
+                            "Content-Type": 'application/json',
+                        }
+                    }).then(page.success, _failure);
+                };
+
+                function _success(response) {
+                    if (response.data && response.data.result === true) {
+                        $scope.doAnyPost("welcome");
+                    } else {
+                        alert(response.data.reason);
+                    }
+                    _clearForm();
+                }
+
+                function _failure(response) {
+                    _clearForm();
+                    alert(response.data.message || response.statusText);
+                }
+
+                function _clearForm() {
+                    $scope.form.email = "";
+                    $scope.form.password = "";
+                }
+
+                function _flip(newId) {
+                    if ($scope.phaseId == newId) {
+                        return;
+                    }
+                    const oldItem = document.getElementById($scope.phaseId);
+                    oldItem.setAttribute("class", "turn-off");
+                    const newItem = document.getElementById(newId);
+                    newItem.setAttribute("class", "turn-on");
+                    $scope.phaseId = newId;
+                }
+            });
+        </script>
+    </head>
+    <body ng-app="LoginManagement" ng-controller="LoginManagementController">
+        <div id="login" class="turn-on">
+            <h1>Please Login</h1>
+            <form>
+                <table class="table">
+                    <tr>
+                        <th>Email</th>
+                        <td><input type="text" name="email" ng-model="form.email" /></td>
+                    </tr>
+                    <tr>
+                        <th>Password</th>
+                        <td><input type="password" name="password" ng-model="form.password" /></td>
+                    </tr>
+                    <tr colspan="2">
+                        <td>
+                            <button type="button" ng-click="doLogin()">Sign In</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="welcome" class="turn-off">
+            <h1>Welcome to KVS Data Analyzer.</h1>
+            <table class="table">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ user.id }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ user.name }}</td>
+                </tr>
+            </table>
+            <button type="button" ng-click="doAnyPost('logout')">Log out</button>
+        </div>
+    </body>
+</html>
