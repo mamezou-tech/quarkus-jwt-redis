@@ -30,7 +30,6 @@ public class LoginResource {
 
     // コンストラクタ：ユーザ2人を定義
     public LoginResource() {
-        users.put("minoru-matsumoto@mamezou.com", new User("minoru-matsumoto@mamezou.com", new HashSet<>(Arrays.asList(User.Groups.ADMIN)), "matsumoto"));
         users.put("hogehoge@example.com", new User("hogehoge@example.com", new HashSet<>(Arrays.asList(User.Groups.USER)), "hogehoge"));
     }
 

@@ -26,7 +26,7 @@ public class LoginResource extends BaseResource {
 
     public LoginResource() {
         // ユーザ登録
-        umap.put("minoru-matsumoto@mamezou.com", new User(1, "minoru-matsumoto@mamezou.com", "Minoru Matsumoto", "Matsumoto31"));
+        umap.put("hogehoge@example.com", new User(1, "hogehoge@example.com", "Hogehoge User", "hogehoge"));
     }
 
     @POST
